@@ -23,7 +23,8 @@ class MainWin(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
 
-
+global h
+h=0
 app = QtWidgets.QApplication(sys.argv)
 loop = QEventLoop(app)
 l=asyncio.new_event_loop()
@@ -49,7 +50,8 @@ class ChargePoint(cp):
        global window
        CP = DataBase.connect(DataBase.Get_ChargePoint())
        for row in CP:
-            if charge_point_vendor == row[2] and charge_point_model == row[1]:
+            print(row[1])
+            if charge_point_vendor == row[1] and charge_point_model == row[2]:
                 window.tableWidget.setItem(row[0]-1, 3, QTableWidgetItem("Подключен"))
                 B=call_result.BootNotificationPayload(
                     current_time=datetime.utcnow().isoformat(),
@@ -75,6 +77,19 @@ class ChargePoint(cp):
                 'status': 'Accepted'
             }
         )
+
+    @on(Action.MeterValues)
+    def on_meter_values(self, connector_id: int, meter_value: list, **kwargs):
+        return call_result.MeterValuesPayload()
+
+    @on(Action.StopTransaction)
+    def on_stop_transaction(self, meter_stop: int, timestamp: str, transaction_id: int, **kwargs):
+        return call_result.StopTransactionPayload()
+
+    @on(Action.StatusNotification)
+    def on_status_notification(self, connector_id: int, error_code: str, status: str, timestamp:str, **kwargs):
+        return call_result.StatusNotificationPayload()
+
     async def change_configuration(self):
         response = await self.call(call.ChangeConfigurationPayload(
             key="HeartbeatInterval",
@@ -82,6 +97,14 @@ class ChargePoint(cp):
         ))
 
         print(response.status)
+
+    async def remote_start_transaction(self):
+            request = call.RemoteStartTransactionPayload(
+                id_tag='1'
+               )
+            response = await self.call(request)
+            if response.status == RemoteStartStopStatus.accepted:
+                print("Transaction Started!!!")
 
 
 async def on_connect(websocket, path):
@@ -112,19 +135,24 @@ async def on_connect(websocket, path):
     print(charge_point_id)
     print(websocket.remote_address[0])
 
-    async def hhhh():
-        global h
+    async def remotestart():
+        global h,N
         while True:
             if h==1:
-                if cp.id=="CP_1":
-                    await cp.change_configuration()
+                if cp.id==N:
+                    await cp.remote_start_transaction()
                     h=0
                 else:
                     await asyncio.sleep(0.1)
             else:
                 await asyncio.sleep(0.1)
-
-    await asyncio.gather(cp.start())
+    try:
+        await asyncio.gather(cp.start(),remotestart())
+    except websockets.exceptions.ConnectionClosedError:
+        for row in range(window.tableWidget.rowCount()):
+            if charge_point_id == window.tableWidget.item(row,0).text():
+                window.tableWidget.setItem(row, 3, QTableWidgetItem("Отключен"))
+                break
 
 async def main():
     global server
@@ -143,9 +171,17 @@ def close():
     server.close()
 def open():
     asyncio.create_task(master())
+def button_remote():
+    global N
+    R=window.tableWidget.currentRow()
+    C=window.tableWidget.currentColumn()
+    N=window.tableWidget.item(R,C).text()
+    global h
+    h=1
 
 
 window.pushButton.clicked.connect(close)
 window.pushButton_2.clicked.connect(open)
+window.pushButton_3.clicked.connect(button_remote)
 
 loop.run_forever()
