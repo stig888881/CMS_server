@@ -43,6 +43,7 @@ for row in CP:
     window.tableWidget.setItem(rowCount, 0, QTableWidgetItem(CP_N))
     window.tableWidget.setItem(rowCount, 1, QTableWidgetItem(Vendor))
     window.tableWidget.setItem(rowCount, 2, QTableWidgetItem(Model))
+    window.tableWidget.setItem(rowCount, 3, QTableWidgetItem("Отключен"))
 
 class ChargePoint(cp):
     @on(Action.BootNotification)
@@ -72,15 +73,38 @@ class ChargePoint(cp):
         )
     @on(Action.Authorize)
     def on_autorize(self, id_tag: str, **kwargs):
-        return call_result.AuthorizePayload(
-            id_tag_info={
-                'status': 'Accepted'
-            }
-        )
-
+        Client = DataBase.connect(DataBase.Get_Client())
+        for row in Client:
+            if row[2] == id_tag:
+                window.tableWidget.setItem(0, 5, QTableWidgetItem(id_tag+": "+row[1]))
+                print('another connection')
+                return call_result.AuthorizePayload(
+                    id_tag_info={
+                        'status': 'Accepted'
+                        }
+                        )
+            else:
+                print('Denied')
+                return call_result.AuthorizePayload(
+                    id_tag_info={
+                        'status': 'Invalid'
+                        }
+                        )
+            break
     @on(Action.MeterValues)
     def on_meter_values(self, connector_id: int, meter_value: list, **kwargs):
         return call_result.MeterValuesPayload()
+
+    @on(Action.StartTransaction)
+    def start_transaction(self, connector_id: int, id_tag: str, meter_start: int, timestamp: str):
+        return call_result.StartTransactionPayload(
+            transaction_id=1,
+            id_tag_info = {
+            'status': 'Accepted'
+                        }
+        )
+
+
 
     @on(Action.StopTransaction)
     def on_stop_transaction(self, meter_stop: int, timestamp: str, transaction_id: int, **kwargs):
@@ -99,8 +123,11 @@ class ChargePoint(cp):
         print(response.status)
 
     async def remote_start_transaction(self):
+            global window
+            R = window.tableWidget.currentRow()
+            N = window.tableWidget.item(R, 5).text()
             request = call.RemoteStartTransactionPayload(
-                id_tag='1'
+                id_tag=N
                )
             response = await self.call(request)
             if response.status == RemoteStartStopStatus.accepted:
@@ -152,6 +179,7 @@ async def on_connect(websocket, path):
         for row in range(window.tableWidget.rowCount()):
             if charge_point_id == window.tableWidget.item(row,0).text():
                 window.tableWidget.setItem(row, 3, QTableWidgetItem("Отключен"))
+                window.tableWidget.setItem(row, 5, QTableWidgetItem(""))
                 break
 
 async def main():
