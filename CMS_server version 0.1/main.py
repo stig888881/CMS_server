@@ -46,6 +46,8 @@ for row in CP:
     window.tableWidget.setItem(rowCount, 3, QTableWidgetItem("Отключен"))
 
 class ChargePoint(cp):
+
+    """Сообщения приходящие от точки зарядки"""
     @on(Action.BootNotification)
     def on_boot_notification(  self, charge_point_vendor: str, charge_point_model: str, **kwargs):
        global window
@@ -96,14 +98,21 @@ class ChargePoint(cp):
         return call_result.MeterValuesPayload()
 
     @on(Action.StartTransaction)
-    def start_transaction(self, connector_id: int, id_tag: str, meter_start: int, timestamp: str):
+    def on_start_transaction(self, connector_id: int, id_tag: str, meter_start: int, timestamp: str, **kwargs):
         return call_result.StartTransactionPayload(
             transaction_id=1,
             id_tag_info = {
             'status': 'Accepted'
                         }
         )
-
+    @on(Action.DataTransfer)
+    def on_data_transfer(self, vendor_id: str, **kwargs):
+        return call_result.DataTransferPayload(
+            status=DataTransferStatus.accepted
+        )
+    @on(Action.DiagnosticsStatusNotification)
+    def on_diagnostics_status(self, status:str):
+        return call_result.DiagnosticsStatusNotificationPayload()
 
 
     @on(Action.StopTransaction)
@@ -113,6 +122,9 @@ class ChargePoint(cp):
     @on(Action.StatusNotification)
     def on_status_notification(self, connector_id: int, error_code: str, status: str, timestamp:str, **kwargs):
         return call_result.StatusNotificationPayload()
+    @on(Action.FirmwareStatusNotification)
+    def on_firmware_status(self, status:str):
+        return call_result.FirmwareStatusNotificationPayload()
 
     async def change_configuration(self):
         response = await self.call(call.ChangeConfigurationPayload(
