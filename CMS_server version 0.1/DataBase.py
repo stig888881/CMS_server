@@ -42,14 +42,24 @@ def Get_ChargePoint():
     return sql_insert_query
 
 def Insert(idT):
-    sql_insert_query = """ INSERT INTO public."Transaction" ("User") VALUES (%s)"""
+    sql_insert_query = """ INSERT INTO public."Transaction" ("Client") VALUES (%s)"""
     id = idT
     return sql_insert_query, id
-def Get_Trans():
-    sql_insert_query = """ SELECT id FROM public."Transaction" ORDER BY id DESC LIMIT 1 """
-    return sql_insert_query
+def Get_Trans(tag:str):
+    connection = psycopg2.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=db_name)
+    cursor = connection.cursor()
+    id = tag
+    cursor.execute('SELECT id FROM public."Transaction" WHERE "Client"=%s ORDER BY id DESC LIMIT 1', (id,))
+    c = cursor.fetchone()
+    return c[0]
 
-# Client=connect(Get_ChargePoint())
+# i="AA 12345"
+# Client=Get_Trans(i)
+# print(Client)
 # for row in Client:
 #     print(row[0])
 #     print(row[1])

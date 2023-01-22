@@ -99,8 +99,9 @@ class ChargePoint(cp):
 
     @on(Action.StartTransaction)
     def on_start_transaction(self, connector_id: int, id_tag: str, meter_start: int, timestamp: str, **kwargs):
+        DataBase.connect(DataBase.Insert(id_tag))
         return call_result.StartTransactionPayload(
-            transaction_id=1,
+            transaction_id=DataBase.Get_Trans(id_tag),
             id_tag_info = {
             'status': 'Accepted'
                         }
