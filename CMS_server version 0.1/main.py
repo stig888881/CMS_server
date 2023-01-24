@@ -8,7 +8,7 @@ from ocpp.v16 import ChargePoint as cp
 from ocpp.v16.enums import Action, RegistrationStatus
 from ocpp.v16 import call_result, call
 from ocpp.v16.enums import *
-from threading import Thread
+
 
 import DB_client
 import DataBase
@@ -42,7 +42,8 @@ class DB_win(QtWidgets.QMainWindow, DB_client.Ui_Form):
     def add_client(self):
         clinet = self.lineEdit.text()
         id_tag = self.lineEdit_2.text()
-        DataBase.connect(DataBase.Insert_client(clinet, id_tag))
+        parentid = self.lineEdit_3.text()
+        DataBase.connect(DataBase.Insert_client(clinet, id_tag, parentid))
 
 
 
@@ -133,8 +134,9 @@ class ChargePoint(cp):
 
     @on(Action.StartTransaction)
     def on_start_transaction(self, connector_id: int, id_tag: str, meter_start: int, timestamp: str, **kwargs):
-        for row in range(window.tableWidget.rowCount()):
-            if id_tag == window.tableWidget.item(row,5).text():
+        Client = DataBase.connect(DataBase.Get_Client())
+        for row in Client:
+            if row[2] == id_tag:
                 DataBase.connect(DataBase.Insert_transaction(id_tag))
                 return call_result.StartTransactionPayload(
                     transaction_id=DataBase.Get_Trans(id_tag),
@@ -172,6 +174,7 @@ class ChargePoint(cp):
     def on_firmware_status(self, status:str):
         return call_result.FirmwareStatusNotificationPayload()
 
+    """Сообщения приходящие от центральной системы"""
     async def change_configuration(self):
         response = await self.call(call.ChangeConfigurationPayload(
             key="HeartbeatInterval",

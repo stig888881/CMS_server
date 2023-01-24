@@ -46,11 +46,12 @@ def Insert_transaction(idT):
     id = idT
     return sql_insert_query, id
 
-def Insert_client(client,token):
+def Insert_client(client,token,groupid):
     sql_insert_query = """ INSERT INTO public."Client" ("Name","IdTag") VALUES (%s,%s)"""
     cl = client
     tag = token
-    return sql_insert_query, cl, tag
+    parentid=groupid
+    return sql_insert_query, cl, tag,parentid
 
 def Get_Trans(tag:str):
     connection = psycopg2.connect(

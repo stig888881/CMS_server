@@ -162,7 +162,7 @@
     </column>
     <column>
      <property name="text">
-      <string>Статус</string>
+      <string>Подкючение</string>
      </property>
     </column>
     <column>
@@ -172,7 +172,7 @@
     </column>
     <column>
      <property name="text">
-      <string>Авторизация</string>
+      <string>Статус</string>
      </property>
     </column>
     <column>
