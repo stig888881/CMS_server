@@ -9,6 +9,8 @@ from ocpp.v16.enums import Action, RegistrationStatus
 from ocpp.v16 import call_result, call
 from ocpp.v16.enums import *
 from threading import Thread
+
+import DB_client
 import DataBase
 
 from PyQt5 import QtWidgets, QtGui
@@ -17,11 +19,33 @@ import MainWindow
 from asyncqt import QEventLoop
 
 class MainWin(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, parent=None):
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
-        super().__init__()
+        super(MainWin,self).__init__(parent)
+        self.parent=parent
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+        self.pushButton_4.clicked.connect(self.createDialog)
+
+    def createDialog(self):
+        #        self.dialog = PreDialog(self)
+        self.dialog = DB_win(self.parent)
+        self.dialog.show()
+
+class DB_win(QtWidgets.QMainWindow, DB_client.Ui_Form):
+    def __init__(self, parent=None):
+        super(DB_win,self).__init__(parent)
+        self.parent=parent
+        self.setupUi(self)
+        self.pushButton.clicked.connect(self.add_client)
+
+    def add_client(self):
+        clinet = self.lineEdit.text()
+        id_tag = self.lineEdit_2.text()
+        DataBase.connect(DataBase.Insert_client(clinet, id_tag))
+
+
+
 
 global h
 h=0
@@ -29,6 +53,7 @@ app = QtWidgets.QApplication(sys.argv)
 loop = QEventLoop(app)
 l=asyncio.new_event_loop()
 window = MainWin()
+Add_Client=DB_win()
 window.show()
 
 logging.basicConfig(level=logging.INFO)
@@ -44,6 +69,15 @@ for row in CP:
     window.tableWidget.setItem(rowCount, 1, QTableWidgetItem(Vendor))
     window.tableWidget.setItem(rowCount, 2, QTableWidgetItem(Model))
     window.tableWidget.setItem(rowCount, 3, QTableWidgetItem("Отключен"))
+CL=DataBase.connect(DataBase.Get_Client())
+for row in CL:
+    rowCount=window.tableWidget_2.rowCount()
+    window.tableWidget_2.insertRow(rowCount)
+    Client=row[1]
+    idToken=row[2]
+    window.tableWidget_2.setItem(rowCount,0, QTableWidgetItem(Client))
+    window.tableWidget_2.setItem(rowCount,1,QTableWidgetItem(idToken))
+
 
 class ChargePoint(cp):
 
@@ -78,7 +112,7 @@ class ChargePoint(cp):
         Client = DataBase.connect(DataBase.Get_Client())
         for row in Client:
             if row[2] == id_tag:
-                window.tableWidget.setItem(0, 5, QTableWidgetItem(id_tag+": "+row[1]))
+                window.tableWidget.setItem(0, 5, QTableWidgetItem(id_tag))
                 print('another connection')
                 return call_result.AuthorizePayload(
                     id_tag_info={
@@ -99,13 +133,24 @@ class ChargePoint(cp):
 
     @on(Action.StartTransaction)
     def on_start_transaction(self, connector_id: int, id_tag: str, meter_start: int, timestamp: str, **kwargs):
-        DataBase.connect(DataBase.Insert(id_tag))
-        return call_result.StartTransactionPayload(
-            transaction_id=DataBase.Get_Trans(id_tag),
-            id_tag_info = {
-            'status': 'Accepted'
-                        }
-        )
+        for row in range(window.tableWidget.rowCount()):
+            if id_tag == window.tableWidget.item(row,5).text():
+                DataBase.connect(DataBase.Insert_transaction(id_tag))
+                return call_result.StartTransactionPayload(
+                    transaction_id=DataBase.Get_Trans(id_tag),
+                    id_tag_info={
+                        'status': 'Accepted'
+                    }
+                    )
+            else:
+                return call_result.StartTransactionPayload(
+                    transaction_id=0,
+                    id_tag_info={
+                        'status': 'Invalid'
+                    }
+                )
+            break
+
     @on(Action.DataTransfer)
     def on_data_transfer(self, vendor_id: str, **kwargs):
         return call_result.DataTransferPayload(
@@ -137,8 +182,8 @@ class ChargePoint(cp):
 
     async def remote_start_transaction(self):
             global window
-            R = window.tableWidget.currentRow()
-            N = window.tableWidget.item(R, 5).text()
+            R = window.tableWidget_2.currentRow()
+            N = window.tableWidget_2.item(R, 1).text()
             request = call.RemoteStartTransactionPayload(
                 id_tag=N
                )
@@ -221,8 +266,10 @@ def button_remote():
     h=1
 
 
+
 window.pushButton.clicked.connect(close)
 window.pushButton_2.clicked.connect(open)
 window.pushButton_3.clicked.connect(button_remote)
+
 
 loop.run_forever()

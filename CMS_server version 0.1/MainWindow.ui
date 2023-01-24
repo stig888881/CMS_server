@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1143</width>
+    <width>1240</width>
     <height>490</height>
    </rect>
   </property>
@@ -172,7 +172,7 @@
     </column>
     <column>
      <property name="text">
-      <string>Клиент</string>
+      <string>Авторизация</string>
      </property>
     </column>
     <column>
@@ -220,13 +220,33 @@
      <string>Добавление в БД точку зарядки</string>
     </property>
    </widget>
+   <widget class="QTableWidget" name="tableWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>980</x>
+      <y>140</y>
+      <width>231</width>
+      <height>291</height>
+     </rect>
+    </property>
+    <column>
+     <property name="text">
+      <string>Клиент</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>IdToken</string>
+     </property>
+    </column>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1143</width>
+     <width>1240</width>
      <height>21</height>
     </rect>
    </property>

@@ -41,10 +41,17 @@ def Get_ChargePoint():
     sql_insert_query = """ SELECT * FROM public."ChargePoints" """
     return sql_insert_query
 
-def Insert(idT):
+def Insert_transaction(idT):
     sql_insert_query = """ INSERT INTO public."Transaction" ("Client") VALUES (%s)"""
     id = idT
     return sql_insert_query, id
+
+def Insert_client(client,token):
+    sql_insert_query = """ INSERT INTO public."Client" ("Name","IdTag") VALUES (%s,%s)"""
+    cl = client
+    tag = token
+    return sql_insert_query, cl, tag
+
 def Get_Trans(tag:str):
     connection = psycopg2.connect(
         host=host,
