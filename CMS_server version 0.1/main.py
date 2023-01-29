@@ -91,7 +91,7 @@ class ChargePoint(cp):
             print(row[1])
             if charge_point_vendor == row[1] and charge_point_model == row[2]:
                 window.tableWidget.setItem(row[0]-1, 3, QTableWidgetItem("Подключен"))
-                B=call_result.BootNotificationPayload(
+                res=call_result.BootNotificationPayload(
                     current_time=datetime.utcnow().isoformat(),
                     interval=10,
                     status=RegistrationStatus.accepted
@@ -100,7 +100,7 @@ class ChargePoint(cp):
             else:
                    B=call_result.BootNotificationPayload(current_time=datetime.utcnow().isoformat(), interval=10, status=RegistrationStatus.rejected)
 
-       return B
+       return res
 
     @on("Heartbeat")
     def on_heartbeat(self):
@@ -134,24 +134,30 @@ class ChargePoint(cp):
 
     @on(Action.StartTransaction)
     def on_start_transaction(self, connector_id: int, id_tag: str, meter_start: int, timestamp: str, **kwargs):
-        Client = DataBase.connect(DataBase.Get_Client())
-        for row in Client:
+        Cl = DataBase.connect(DataBase.Get_Client())
+        for row in Cl:
             if row[2] == id_tag:
-                DataBase.connect(DataBase.Insert_transaction(id_tag))
-                return call_result.StartTransactionPayload(
+                status="Accepted"
+                break
+            else:
+                status="Invalid"
+        if status=="Accepted":
+            DataBase.connect(DataBase.Start_transaction(id_tag,status,self.id,timestamp,connector_id,meter_start))
+            return call_result.StartTransactionPayload(
                     transaction_id=DataBase.Get_Trans(id_tag),
                     id_tag_info={
                         'status': 'Accepted'
                     }
                     )
-            else:
-                return call_result.StartTransactionPayload(
-                    transaction_id=0,
+        else:
+            DataBase.connect(DataBase.Start_transaction(id_tag, status,self.id,timestamp,connector_id,meter_start))
+            return call_result.StartTransactionPayload(
+                    transaction_id=DataBase.Get_Trans(id_tag),
                     id_tag_info={
                         'status': 'Invalid'
                     }
-                )
-            break
+                    )
+
 
     @on(Action.DataTransfer)
     def on_data_transfer(self, vendor_id: str, **kwargs):
@@ -165,6 +171,7 @@ class ChargePoint(cp):
 
     @on(Action.StopTransaction)
     def on_stop_transaction(self, meter_stop: int, timestamp: str, transaction_id: int, **kwargs):
+        DataBase.connect(DataBase.Stop_transaction(timestamp,meter_stop,transaction_id))
         return call_result.StopTransactionPayload()
 
     @on(Action.StatusNotification)
@@ -174,7 +181,7 @@ class ChargePoint(cp):
     def on_firmware_status(self, status:str):
         return call_result.FirmwareStatusNotificationPayload()
 
-    """Сообщения приходящие от центральной системы"""
+    """Сообщения исходящие от центральной системы"""
     async def change_configuration(self):
         response = await self.call(call.ChangeConfigurationPayload(
             key="HeartbeatInterval",

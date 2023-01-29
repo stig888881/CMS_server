@@ -41,10 +41,22 @@ def Get_ChargePoint():
     sql_insert_query = """ SELECT * FROM public."ChargePoints" """
     return sql_insert_query
 
-def Insert_transaction(idT):
-    sql_insert_query = """ INSERT INTO public."Transaction" ("Client") VALUES (%s)"""
+def Start_transaction(idT, status, cp, start_time, con_id, met_start):
+    sql_insert_query = """ INSERT INTO public."Transaction" ("Client","Status","CP","Start_time","Connector_id","Meter_start") VALUES (%s,%s,%s,%s,%s,%s)"""
     id = idT
-    return sql_insert_query, id
+    Status=status
+    CP=cp
+    Start_time=start_time
+    Connector_id=con_id
+    Meter_start=met_start
+    return sql_insert_query, id, Status, CP, Start_time, Connector_id, Meter_start
+def Stop_transaction(stop_time,meter_stop,idT):
+    sql_insert_query = """ UPDATE public."Transaction" SET "Stop_time"=%s, "Meter_stop"=%s WHERE "id"=%s """
+    Stop_time=stop_time
+    Meter_stop=meter_stop
+    id=idT
+    return sql_insert_query,Stop_time,Meter_stop,id
+
 
 def Insert_client(client,token,groupid):
     sql_insert_query = """ INSERT INTO public."Client" ("Name","IdTag") VALUES (%s,%s)"""
