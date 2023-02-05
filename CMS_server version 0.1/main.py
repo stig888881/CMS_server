@@ -14,7 +14,7 @@ import DB_client
 import DataBase
 
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import QTableWidgetItem
+from PyQt5.QtWidgets import QTableWidgetItem, QDialog, QMessageBox
 import MainWindow
 from asyncqt import QEventLoop
 
@@ -25,25 +25,34 @@ class MainWin(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         super(MainWin,self).__init__(parent)
         self.parent=parent
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
-        self.pushButton_4.clicked.connect(self.createDialog)
+        self.pushButton_4.clicked.connect(self.createDialogADDclient)
 
-    def createDialog(self):
-        #        self.dialog = PreDialog(self)
-        self.dialog = DB_win(self.parent)
+    def createDialogADDclient(self):
+        self.dialog = DB_Client(self.parent)
         self.dialog.show()
 
-class DB_win(QtWidgets.QMainWindow, DB_client.Ui_Form):
+
+class DB_Client(QtWidgets.QMainWindow, DB_client.Ui_Form):
     def __init__(self, parent=None):
-        super(DB_win,self).__init__(parent)
+        super(DB_Client,self).__init__(parent)
         self.parent=parent
         self.setupUi(self)
         self.pushButton.clicked.connect(self.add_client)
+        self.pushButton.clicked.connect(self.lineEdit.clear)
+        self.pushButton.clicked.connect(self.lineEdit_2.clear)
+        self.pushButton.clicked.connect(self.lineEdit_3.clear)
+
 
     def add_client(self):
         clinet = self.lineEdit.text()
         id_tag = self.lineEdit_2.text()
         parentid = self.lineEdit_3.text()
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("Информация")
+        dlg.setText("Клиент добавлен")
+        button=dlg.exec()
         DataBase.connect(DataBase.Insert_client(clinet, id_tag, parentid))
+        view_CL()
 
 
 
@@ -54,30 +63,33 @@ app = QtWidgets.QApplication(sys.argv)
 loop = QEventLoop(app)
 l=asyncio.new_event_loop()
 window = MainWin()
-Add_Client=DB_win()
+Add_Client=DB_Client()
 window.show()
 
 logging.basicConfig(level=logging.INFO)
-
-CP = DataBase.connect(DataBase.Get_ChargePoint())
-for row in CP:
-    rowCount = window.tableWidget.rowCount()
-    window.tableWidget.insertRow(rowCount)
-    CP_N=row[4]
-    Vendor = row[1]
-    Model = row[2]
-    window.tableWidget.setItem(rowCount, 0, QTableWidgetItem(CP_N))
-    window.tableWidget.setItem(rowCount, 1, QTableWidgetItem(Vendor))
-    window.tableWidget.setItem(rowCount, 2, QTableWidgetItem(Model))
-    window.tableWidget.setItem(rowCount, 3, QTableWidgetItem("Отключен"))
-CL=DataBase.connect(DataBase.Get_Client())
-for row in CL:
-    rowCount=window.tableWidget_2.rowCount()
-    window.tableWidget_2.insertRow(rowCount)
-    Client=row[1]
-    idToken=row[2]
-    window.tableWidget_2.setItem(rowCount,0, QTableWidgetItem(Client))
-    window.tableWidget_2.setItem(rowCount,1,QTableWidgetItem(idToken))
+def view_CP():
+    CP = DataBase.connect(DataBase.Get_ChargePoint())
+    for row in CP:
+        rowCount = window.tableWidget.rowCount()
+        window.tableWidget.insertRow(rowCount)
+        CP_N=row[4]
+        Vendor = row[1]
+        Model = row[2]
+        window.tableWidget.setItem(rowCount, 0, QTableWidgetItem(CP_N))
+        window.tableWidget.setItem(rowCount, 1, QTableWidgetItem(Vendor))
+        window.tableWidget.setItem(rowCount, 2, QTableWidgetItem(Model))
+        window.tableWidget.setItem(rowCount, 3, QTableWidgetItem("Отключен"))
+view_CP()
+def view_CL():
+    CL=DataBase.connect(DataBase.Get_Client())
+    for row in CL:
+        rowCount=window.tableWidget_2.rowCount()
+        window.tableWidget_2.insertRow(rowCount)
+        Client=row[1]
+        idToken=row[2]
+        window.tableWidget_2.setItem(rowCount,0, QTableWidgetItem(Client))
+        window.tableWidget_2.setItem(rowCount,1,QTableWidgetItem(idToken))
+view_CL()
 
 
 class ChargePoint(cp):

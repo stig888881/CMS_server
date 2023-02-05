@@ -59,7 +59,7 @@ def Stop_transaction(stop_time,meter_stop,idT):
 
 
 def Insert_client(client,token,groupid):
-    sql_insert_query = """ INSERT INTO public."Client" ("Name","IdTag") VALUES (%s,%s)"""
+    sql_insert_query = """ INSERT INTO public."Client" ("Name","idTag","parentId") VALUES (%s,%s,%s)"""
     cl = client
     tag = token
     parentid=groupid
