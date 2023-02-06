@@ -59,11 +59,18 @@ def Stop_transaction(stop_time,meter_stop,idT):
 
 
 def Insert_client(client,token,groupid):
-    sql_insert_query = """ INSERT INTO public."Client" ("Name","idTag","parentId") VALUES (%s,%s,%s)"""
+    sql_insert_query = """ INSERT INTO public."Client" ("Name","IdTag","ParentIdTag") VALUES (%s,%s,%s)"""
     cl = client
     tag = token
     parentid=groupid
     return sql_insert_query, cl, tag,parentid
+def Insert_cp(vendor,model,ip,cp_tag):
+    sql_insert_query = """ INSERT INTO public."ChargePoints" ("Vendor","Model","IP","CP") VALUES (%s,%s,%s,%s)"""
+    Vendor = vendor
+    Model = model
+    Ip = ip
+    Cp_tag = cp_tag
+    return sql_insert_query, Vendor, Model, Ip, Cp_tag
 
 def Get_Trans(tag:str):
     connection = psycopg2.connect(

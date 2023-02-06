@@ -9,7 +9,7 @@ from ocpp.v16.enums import Action, RegistrationStatus
 from ocpp.v16 import call_result, call
 from ocpp.v16.enums import *
 
-
+import DB_chargepoint
 import DB_client
 import DataBase
 
@@ -20,15 +20,17 @@ from asyncqt import QEventLoop
 
 class MainWin(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def __init__(self, parent=None):
-        # Это здесь нужно для доступа к переменным, методам
-        # и т.д. в файле design.py
         super(MainWin,self).__init__(parent)
         self.parent=parent
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.pushButton_4.clicked.connect(self.createDialogADDclient)
+        self.pushButton_5.clicked.connect(self.createDialogADDchargepoint)
 
     def createDialogADDclient(self):
         self.dialog = DB_Client(self.parent)
+        self.dialog.show()
+    def createDialogADDchargepoint(self):
+        self.dialog = DB_ChargePoint(self.parent)
         self.dialog.show()
 
 
@@ -43,6 +45,7 @@ class DB_Client(QtWidgets.QMainWindow, DB_client.Ui_Form):
         self.pushButton.clicked.connect(self.lineEdit_3.clear)
 
 
+
     def add_client(self):
         clinet = self.lineEdit.text()
         id_tag = self.lineEdit_2.text()
@@ -50,10 +53,32 @@ class DB_Client(QtWidgets.QMainWindow, DB_client.Ui_Form):
         dlg = QMessageBox(self)
         dlg.setWindowTitle("Информация")
         dlg.setText("Клиент добавлен")
-        button=dlg.exec()
+        dlg.exec()
         DataBase.connect(DataBase.Insert_client(clinet, id_tag, parentid))
         view_CL()
 
+class DB_ChargePoint(QtWidgets.QMainWindow, DB_chargepoint.Ui_Form):
+    def __init__(self, parent=None):
+        super(DB_ChargePoint,self).__init__(parent)
+        self.parent=parent
+        self.setupUi(self)
+        self.pushButton.clicked.connect(self.add_cp)
+        self.pushButton.clicked.connect(self.lineEdit.clear)
+        self.pushButton.clicked.connect(self.lineEdit_2.clear)
+        self.pushButton.clicked.connect(self.lineEdit_3.clear)
+        self.pushButton.clicked.connect(self.lineEdit_4.clear)
+
+    def add_cp(self):
+        vendor = self.lineEdit.text()
+        model = self.lineEdit_2.text()
+        ip = self.lineEdit_3.text()
+        cp_tag = self.lineEdit_4.text()
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("Информация")
+        dlg.setText("Точка зарядки добавлен")
+        dlg.exec()
+        DataBase.connect(DataBase.Insert_cp(vendor, model, ip, cp_tag))
+        view_CP()
 
 
 
@@ -64,11 +89,13 @@ loop = QEventLoop(app)
 l=asyncio.new_event_loop()
 window = MainWin()
 Add_Client=DB_Client()
+Add_CP=DB_ChargePoint()
 window.show()
 
 logging.basicConfig(level=logging.INFO)
 def view_CP():
     CP = DataBase.connect(DataBase.Get_ChargePoint())
+    window.tableWidget.setRowCount(0)
     for row in CP:
         rowCount = window.tableWidget.rowCount()
         window.tableWidget.insertRow(rowCount)
@@ -82,6 +109,7 @@ def view_CP():
 view_CP()
 def view_CL():
     CL=DataBase.connect(DataBase.Get_Client())
+    window.tableWidget_2.setRowCount(0)
     for row in CL:
         rowCount=window.tableWidget_2.rowCount()
         window.tableWidget_2.insertRow(rowCount)
