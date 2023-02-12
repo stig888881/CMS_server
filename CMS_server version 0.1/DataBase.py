@@ -118,6 +118,7 @@ def Get_Connector(cp_tag):
     sql_insert_query = """SELECT "Connector_1","Connector_2","Connector_3" FROM public."Connector" WHERE "CP_tag"=%s"""
     return sql_insert_query, CP_tag
 
+
 # i="Test"
 # Transz=connect(Stop_transaction('111',1,23))
 # Client=connect(Get_Client())
