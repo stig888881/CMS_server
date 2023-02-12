@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>656</width>
     <height>300</height>
    </rect>
   </property>
@@ -117,6 +117,195 @@
    <property name="text">
     <string>Добавить</string>
    </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>40</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Конектор №1</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>60</y>
+     <width>111</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Нет</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Type 1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Type 2</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>GB\T</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>CHAdeMO</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Tesla SG</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>CSS Combo 1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>CSS Combo 2</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>100</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Конектор № 2</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox_2">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>130</y>
+     <width>111</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Нет</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Type 1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Type 2</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>GB\T</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>CHAdeMO</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Tesla SG</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>CSS Combo 1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>CSS Combo 2</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>170</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Конектор № 3</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox_3">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>200</y>
+     <width>111</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Нет</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Type 1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Type 2</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>GB\T</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>CHAdeMO</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Tesla SG</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>CSS Combo 1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>CSS Combo 2</string>
+    </property>
+   </item>
   </widget>
  </widget>
  <resources/>

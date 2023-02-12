@@ -23,6 +23,10 @@ def connect(*args):
             sql = args[0]
             cursor.execute(sql[0], sql[1:])
             connection.commit()
+            if cursor.rowcount==1:
+                Client = cursor.fetchone()
+                return Client
+
 
     except (Exception, psycopg2.Error) as error:
         print("Failed inserting record into mobile table {}".format(error))
@@ -72,27 +76,59 @@ def Insert_cp(vendor,model,ip,cp_tag):
     Cp_tag = cp_tag
     return sql_insert_query, Vendor, Model, Ip, Cp_tag
 
-def Get_Trans(tag:str):
-    connection = psycopg2.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=db_name)
-    cursor = connection.cursor()
-    id = tag
-    cursor.execute('SELECT id FROM public."Transaction" WHERE "Client"=%s ORDER BY id DESC LIMIT 1', (id,))
-    c = cursor.fetchone()
-    return c[0]
+def Insert_cp_connector(cp_tag,conn_1,conn_2,conn_3):
+    sql_insert_query = """ INSERT INTO public."Connector" ("CP_tag","Connector_1","Connector_2","Connector_3") VALUES (%s,%s,%s,%s)"""
+    Cp_tag = cp_tag
+    Conn_1 = conn_1
+    Conn_2 = conn_2
+    Conn_3 = conn_3
+    return sql_insert_query,Cp_tag, Conn_1, Conn_2, Conn_3,
 
-# i="AA 12345"
-# Client=Get_Trans(i)
+# def Get_Trans(tag:str):
+#     connection = psycopg2.connect(
+#         host=host,
+#         user=user,
+#         password=password,
+#         database=db_name)
+#     cursor = connection.cursor()
+#     id = tag
+#     cursor.execute('SELECT id FROM public."Transaction" WHERE "Client"=%s ORDER BY id DESC LIMIT 1', (id,))
+#     c = cursor.fetchone()
+#     return c[0]
+
+def Get_Trans(id_tag):
+    id=id_tag
+    sql_insert_query ="""SELECT id FROM public."Transaction" WHERE "Client"=%s ORDER BY id DESC LIMIT 1"""
+    return sql_insert_query, id
+
+# def Get_Connector(tag:str):
+#     connection = psycopg2.connect(
+#         host=host,
+#         user=user,
+#         password=password,
+#         database=db_name)
+#     cursor = connection.cursor()
+#     CP_tag = tag
+#     cursor.execute('SELECT "Connector_1","Connector_2","Connector_3" FROM public."Connector" WHERE "CP_tag"=%s', (CP_tag,))
+#     c = cursor.fetchone()
+#     return c
+
+def Get_Connector(cp_tag):
+    CP_tag = cp_tag
+    sql_insert_query = """SELECT "Connector_1","Connector_2","Connector_3" FROM public."Connector" WHERE "CP_tag"=%s"""
+    return sql_insert_query, CP_tag
+
+# i="Test"
+# Transz=connect(Stop_transaction('111',1,23))
+# Client=connect(Get_Client())
 # print(Client)
 # for row in Client:
 #     print(row[0])
 #     print(row[1])
 #     print(row[2])
 # connect(Insert(1))
-# Trans = connect(Get_Trans())
-# print(Trans)
-
+# Trans = connect(Get_Trans('AA 12345'))
+# print(Trans[0])
+# Conn=connect(Get_Connector('Test'))
+# print(Conn)
 

@@ -18,6 +18,9 @@ from PyQt5.QtWidgets import QTableWidgetItem, QDialog, QMessageBox
 import MainWindow
 from asyncqt import QEventLoop
 
+import Start_remote
+
+
 class MainWin(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWin,self).__init__(parent)
@@ -25,12 +28,25 @@ class MainWin(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.pushButton_4.clicked.connect(self.createDialogADDclient)
         self.pushButton_5.clicked.connect(self.createDialogADDchargepoint)
+        self.pushButton_6.clicked.connect(self.createDialogStartRemote)
 
     def createDialogADDclient(self):
         self.dialog = DB_Client(self.parent)
         self.dialog.show()
     def createDialogADDchargepoint(self):
         self.dialog = DB_ChargePoint(self.parent)
+        self.dialog.show()
+    def createDialogStartRemote(self):
+        R=self.tableWidget.currentRow()
+        C=self.tableWidget.currentColumn()
+        N=self.tableWidget.item(R,C).text()
+        CP_conn=DataBase.Get_Connector(N)
+        self.dialog = StartRemote(self.parent)
+        self.dialog.label.setText(N)
+        for column in CP_conn:
+            ind= CP_conn.index(column)
+            if column!="Нет":
+                self.dialog.comboBox.addItem("Конектор № "+str(ind+1)+":"+column)
         self.dialog.show()
 
 
@@ -73,12 +89,22 @@ class DB_ChargePoint(QtWidgets.QMainWindow, DB_chargepoint.Ui_Form):
         model = self.lineEdit_2.text()
         ip = self.lineEdit_3.text()
         cp_tag = self.lineEdit_4.text()
+        Conn_1=self.comboBox.currentText()
+        Conn_2 = self.comboBox_2.currentText()
+        Conn_3 = self.comboBox_3.currentText()
         dlg = QMessageBox(self)
         dlg.setWindowTitle("Информация")
         dlg.setText("Точка зарядки добавлен")
         dlg.exec()
         DataBase.connect(DataBase.Insert_cp(vendor, model, ip, cp_tag))
+        DataBase.connect(DataBase.Insert_cp_connector(cp_tag, Conn_1, Conn_2, Conn_3))
         view_CP()
+
+class StartRemote(QtWidgets.QMainWindow, Start_remote.Ui_Form):
+    def __init__(self, parent=None):
+        super(StartRemote,self).__init__(parent)
+        self.parent=parent
+        self.setupUi(self)
 
 
 
@@ -183,8 +209,9 @@ class ChargePoint(cp):
                 status="Invalid"
         if status=="Accepted":
             DataBase.connect(DataBase.Start_transaction(id_tag,status,self.id,timestamp,connector_id,meter_start))
+            t=DataBase.connect(DataBase.Get_Trans(id_tag))
             return call_result.StartTransactionPayload(
-                    transaction_id=DataBase.Get_Trans(id_tag),
+                    transaction_id=t[0],
                     id_tag_info={
                         'status': 'Accepted'
                     }
@@ -240,6 +267,9 @@ class ChargePoint(cp):
             response = await self.call(request)
             if response.status == RemoteStartStopStatus.accepted:
                 print("Transaction Started!!!")
+
+    async def set_charging_profile(self):
+        request=call.SetChargingProfilePayload
 
 
 async def on_connect(websocket, path):
