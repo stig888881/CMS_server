@@ -40,7 +40,7 @@ class MainWin(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         R=self.tableWidget.currentRow()
         C=self.tableWidget.currentColumn()
         N=self.tableWidget.item(R,C).text()
-        CP_conn=DataBase.Get_Connector(N)
+        CP_conn=DataBase.connect(DataBase.Get_Connector(N))
         self.dialog = StartRemote(self.parent)
         self.dialog.label.setText(N)
         for column in CP_conn:
@@ -105,6 +105,15 @@ class StartRemote(QtWidgets.QMainWindow, Start_remote.Ui_Form):
         super(StartRemote,self).__init__(parent)
         self.parent=parent
         self.setupUi(self)
+        CL = DataBase.connect(DataBase.Get_Client())
+        for row in CL:
+            rowCount = self.tableWidget_2.rowCount()
+            self.tableWidget_2.insertRow(rowCount)
+            Client = row[1]
+            idToken = row[2]
+            self.tableWidget_2.setItem(rowCount, 0, QTableWidgetItem(Client))
+            self.tableWidget_2.setItem(rowCount, 1, QTableWidgetItem(idToken))
+
 
 
 

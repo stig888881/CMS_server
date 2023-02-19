@@ -133,3 +133,80 @@ def Get_Connector(cp_tag):
 # Conn=connect(Get_Connector('Test'))
 # print(Conn)
 
+# from psycopg2 import sql
+#
+# connection = psycopg2.connect(
+#     host=host,
+#     user=user,
+#     password=password,
+#     database=db_name)
+# cursor = connection.cursor()
+# Cl='Client'
+# cursor.execute(
+#     sql.SQL("select * from {} ")
+#         .format(sql.Identifier(Cl)))
+# connection.commit()
+# c=cursor.fetchall()
+# print(c)
+class Request:
+    # def __init__(self, table,first,second,third):
+    def __init__(self, *kwargs):
+        self.table=kwargs
+        self.first=kwargs
+        self.second=kwargs
+        self.third=kwargs
+
+class RequestFabric:
+
+        def production(self,request,type_request):
+            product=fabricate(type_request)
+            return product(request)
+def fabricate(type_request):
+        if type_request=='SELECT':
+            return _fabric_select
+        elif type_request=='INSERT':
+            return _fabric_insert
+        else:
+            raise ValueError(type_request)
+
+def _fabric_insert(request):
+    Table=request.table[0]
+    First=request.first[1]
+    Second=request.second[2]
+    Third=request.third[3]
+    names = ['Name','IdTag','ParentIdTag']
+    from psycopg2 import sql
+    connection = psycopg2.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=db_name)
+    cursor = connection.cursor()
+    cursor.execute(
+        sql.SQL("insert into {} ({}) values (%s,%s,%s)")
+        .format(sql.Identifier(Table), sql.SQL(', ').join(map(sql.Identifier, names))),
+        [First,Second,Third])
+    connection.commit()
+
+def _fabric_select(request):
+        Table=request.table[0]
+        from psycopg2 import sql
+
+        connection = psycopg2.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=db_name)
+        cursor = connection.cursor()
+        cursor.execute(
+            sql.SQL("select * from {} ")
+                .format(sql.Identifier(Table)))
+        connection.commit()
+        result=cursor.fetchall()
+        print(result)
+
+# client=Request('Client')
+# request=RequestFabric()
+# request.production(client,'SELECT')
+# client_insert=Request('Client','Gaga','GG 123GH5H0','Damage inc.')
+# request.production(client_insert,'INSERT')
